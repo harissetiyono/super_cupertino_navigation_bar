@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -104,6 +105,10 @@ class _SuperScaffoldState extends State<SuperScaffold> {
   late ScrollController _scrollController;
   late NavigationBarStaticComponentsKeys keys;
 
+  final GlobalKey<NestedScrollViewStatePlus> nestedScrollKey = GlobalKey();
+
+  Timer? _nestedScrollDebounce;
+
   @override
   void initState() {
     super.initState();
@@ -116,7 +121,31 @@ class _SuperScaffoldState extends State<SuperScaffold> {
       _scrollController.addListener(() {
         _scrollOffset = _scrollController.offset;
         Store.instance.scrollOffset.value = _scrollController.offset;
+
         checkIfCollapsed();
+
+        nestedScrollKey.currentState?.innerController.addListener(() async {
+          final innerController = nestedScrollKey.currentState!.innerController;
+          if (innerController.positions.length == 1) {
+            // print(
+            //     'Scrolling inner nested scrollview: ${innerController.offset} max: ${innerController.position.maxScrollExtent}');
+
+            if (innerController.position.maxScrollExtent == 0) {
+              if (_nestedScrollDebounce?.isActive ?? false) {
+                _nestedScrollDebounce!.cancel();
+              }
+
+              _nestedScrollDebounce =
+                  Timer(const Duration(milliseconds: 100), () {
+                _scrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut, // Smooth curve for animation
+                );
+              });
+            }
+          }
+        });
       });
     });
   }
@@ -196,6 +225,8 @@ class _SuperScaffoldState extends State<SuperScaffold> {
         child: Stack(
           children: [
             NestedScrollViewPlus(
+              key: nestedScrollKey,
+              overscrollBehavior: OverscrollBehavior.outer,
               physics: SnapScrollPhysics(
                 parent: const BouncingScrollPhysics(),
                 snaps: [
@@ -217,30 +248,25 @@ class _SuperScaffoldState extends State<SuperScaffold> {
               controller: _scrollController,
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) => [
-                OverlapAbsorberPlus(
-                  sliver: SliverToBoxAdapter(
-                    child: ValueListenableBuilder(
-                        valueListenable:
-                            Store.instance.searchBarAnimationStatus,
-                        builder: (context, animationStatus, child) {
-                          return AnimatedContainer(
-                            duration: animationStatus ==
-                                    SearchBarAnimationStatus.paused
+                ValueListenableBuilder(
+                    valueListenable: Store.instance.searchBarAnimationStatus,
+                    builder: (context, animationStatus, child) {
+                      return AnimatedContainer(
+                        duration:
+                            animationStatus == SearchBarAnimationStatus.paused
                                 ? Duration.zero
                                 : widget.measures.searchBarAnimationDuration,
-                            height: Store.instance.searchBarHasFocus.value
-                                ? (widget.appBar.searchBar!.animationBehavior ==
-                                        SearchBarAnimationBehavior.top
-                                    ? topPadding +
-                                        widget.measures.searchContainerHeight +
-                                        widget.measures.bottomToolbarHeight
-                                            .toDouble()
-                                    : topPadding + widget.measures.appbarHeight)
-                                : topPadding + widget.measures.appbarHeight,
-                          );
-                        }),
-                  ),
-                )
+                        height: Store.instance.searchBarHasFocus.value
+                            ? (widget.appBar.searchBar!.animationBehavior ==
+                                    SearchBarAnimationBehavior.top
+                                ? topPadding +
+                                    widget.measures.searchContainerHeight +
+                                    widget.measures.bottomToolbarHeight
+                                        .toDouble()
+                                : topPadding + widget.measures.appbarHeight)
+                            : topPadding + widget.measures.appbarHeight,
+                      );
+                    }),
               ],
               body: widget.body,
             ),
