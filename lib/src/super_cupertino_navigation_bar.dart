@@ -992,7 +992,8 @@ class _SuperScaffoldState extends State<SuperScaffold> {
                             }
 
                             return Hero(
-                              tag: HeroTag(Navigator.of(context)),
+                              tag: HeroTag(Navigator.of(context),
+                                  id: '${DateTime.now().microsecondsSinceEpoch}'),
                               createRectTween:
                                   linearTranslateWithLargestRectSizeTween,
                               flightShuttleBuilder:

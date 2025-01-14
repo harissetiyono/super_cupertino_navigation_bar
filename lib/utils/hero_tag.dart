@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 
 @immutable
 class HeroTag {
-  const HeroTag(this.navigator);
+  const HeroTag(this.navigator, {this.id});
 
   final NavigatorState? navigator;
+  final String? id; // Add identifier parameter
 
-  // Let the Hero tag be described in tree dumps.
   @override
   String toString() =>
-      'Default Hero tag for Cupertino navigation bars with navigator $navigator';
+      'Hero tag for navigation bar $navigator${id != null ? ' id: $id' : ''}';
 
   @override
   bool operator ==(Object other) {
@@ -19,9 +19,11 @@ class HeroTag {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is HeroTag && other.navigator == navigator;
+    return other is HeroTag &&
+        other.navigator == navigator &&
+        other.id == id; // Include id in equality check
   }
 
   @override
-  int get hashCode => identityHashCode(navigator);
+  int get hashCode => Object.hash(navigator, id); // Include id in hash
 }
