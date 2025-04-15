@@ -695,6 +695,11 @@ class _SuperScaffoldState extends State<SuperScaffold> {
                                                           color: Colors
                                                               .transparent,
                                                           onPressed: () {
+                                                            widget
+                                                                .appBar
+                                                                .searchBar!
+                                                                .onCancel
+                                                                ?.call(null);
                                                             searchBarFocusThings(
                                                                 false);
                                                             _focusNode
@@ -914,6 +919,10 @@ class _SuperScaffoldState extends State<SuperScaffold> {
                                                       padding: EdgeInsets.zero,
                                                       color: Colors.transparent,
                                                       onPressed: () {
+                                                        widget.appBar.searchBar!
+                                                            .onCancel
+                                                            ?.call(null);
+
                                                         searchBarFocusThings(
                                                             false);
                                                         _focusNode.unfocus();

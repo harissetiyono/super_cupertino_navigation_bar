@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class WebFrame extends StatelessWidget {
   final Widget child;
@@ -130,8 +129,7 @@ class WebFrame extends StatelessWidget {
                         ),
                         const Spacer(),
                         CupertinoButton(
-                          onPressed: () => launchUrlString(
-                              'https://github.com/kspo/super_cupertino_navigation_bar'),
+                          onPressed: () {},
                           child: Row(
                             children: [
                               ClipRRect(
